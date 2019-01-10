@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.BookMyShow</groupId>
+    <artifactId>BookMyShowThrift</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <thrift.exe>/usr/local/bin/thrift</thrift.exe>
+        <thrift.interface>${basedir}/src/main/Thrift/BookMyShow.thrift</thrift.interface>
+        <gendir.target>${basedir}/target/generated-sources</gendir.target>
+        <gendir.namespace>org/BookMyShow/thrift/gen</gendir.namespace>
+        <gendir.src>${basedir}/src/main/java/org/BookMyShow/thrift/gen</gendir.src>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.11.0</version>
+        </dependency>
+
+    </dependencies>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.1.RELEASE</version>
+    </parent>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <configuration></configuration>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <target>
+                                <echo>
+                                    create (or clear) output directory for generated files
+                                </echo>
+                                <mkdir dir="${gendir.target}" />
+                                <delete>
+                                    <fileset dir="${gendir.target}" includes="**/*" />
+                                </delete>
+
+                                <echo>
+                                    generate java source files from ${thrift.interface}
+                                </echo>
+                                <exec executable="${thrift.exe}">
+                                    <arg value="--gen" />
+                                    <arg value="java:beans"/>
+                                    <arg value="-o"/>
+                                    <arg value="${gendir.target}"/>
+                                    <arg value="${thrift.interface}"/>
+                                </exec>
+
+                                <!--<echo>
+                                    copy generated files to ${gendir.src}
+                                </echo>
+                                <mkdir dir="${gendir.src}" />
+                                <delete>
+                                    <fileset dir="${gendir.src}" includes="**/*"/>
+                                </delete>
+                                <copy todir="${gendir.src}">
+                                    <fileset dir="target/generated-sources/gen-javabean/${gendir.namespace}"/>
+                                </copy>
+                                <delete>
+                                    <fileset dir="${basedir}/target" includes="**/*"/>
+                                </delete>-->
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${gendir.target}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+</project>
